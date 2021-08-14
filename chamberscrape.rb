@@ -8,7 +8,7 @@ def scraper
     unparsed_page = HTTParty.get(url)
     parse_page = Nokogiri::HTML(unparsed_page)
     company_array = Array.new
-    company_cards = parse_page.css('.tabbertab')
+    company_cards = parse_page.css('.ListingResults_All_CONTAINER')
     company_cards.each do |company|
         comp = {
             company_name: company.css('.ListingResults_All_ENTRYTITLELEFTBOX').text,
