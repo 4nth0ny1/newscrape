@@ -5,7 +5,7 @@ require 'pry'
 
 def scraper
 
-    # get all the links from the member directory /
+    # get all links from the member directory /
 
     url_mother = 'https://web.dallaschamber.org/search'
     unparsed_page_mother = HTTParty.get(url_mother)
@@ -18,13 +18,13 @@ def scraper
         mother_array << link
     end 
 
-    # get all the data from each link 
+    # get data from each link 
 
+    company_array = Array.new
     mother_array.each do |url|
         unparsed_page = HTTParty.get(url)
         parse_page = Nokogiri::HTML(unparsed_page)
 
-        company_array = Array.new
         company_cards = parse_page.css('.ListingResults_All_CONTAINER')
 
         company_cards.each do |company|
@@ -86,4 +86,4 @@ end
 
 scraper
  
-# bug: overwriting output file on each scrape
+# bug not getting all of the address  suite numbers are being left off
