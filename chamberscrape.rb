@@ -46,15 +46,24 @@ def scraper
                 end 
             end
 
+            # company.css('.ListingResults_Level5_MAINLEFTBOX').each do |suite|
+            #     if suite.children.text.include?("Suite")
+            #         unit = suite.
+            #     end
+            # end 
+
             comp = {
                 company_name: company.css('.ListingResults_All_ENTRYTITLELEFTBOX').text,
                 address: company.css("span[@itemprop = 'street-address']").text,
+                unit: unit,
                 city: company.css("span[@itemprop = 'locality']").text,
                 state: company.css("span[@itemprop = 'region']").text,
                 zip: company.css("span[@itemprop = 'postal-code']").text,
                 phone: phone,
                 url: url
             }
+
+            binding.pry
 
             company_array << comp   
         
@@ -87,4 +96,3 @@ end
 scraper
  
 # bug not getting all of the address  suite numbers are being left off
-# sdf
