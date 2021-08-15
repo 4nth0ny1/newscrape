@@ -85,4 +85,5 @@ def scraper
 end 
 
 scraper
-
+ 
+# bug: overwriting output file on each scrape
