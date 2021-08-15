@@ -4,69 +4,84 @@ require 'byebug'
 require 'pry'
 
 def scraper
-    # url = 'https://web.dallaschamber.org/Accounting,-Tax-Preparation,-Bookkeeping,-and-Payroll-Services' 
-    url = 'https://web.dallaschamber.org/Advertising,-Public-Relations,-and-Related-Services'
-    unparsed_page = HTTParty.get(url)
-    parse_page = Nokogiri::HTML(unparsed_page)
 
-    company_array = Array.new
-    company_cards = parse_page.css('.ListingResults_All_CONTAINER')
+    # get all the links from the member directory /
 
-    company_cards.each do |company|
-        
-        phone = ""
-        url = ""
+    url_mother = 'https://web.dallaschamber.org/search'
+    unparsed_page_mother = HTTParty.get(url_mother)
+    parse_page_mother = Nokogiri::HTML(unparsed_page_mother)
+    mother_array = Array.new 
+    url_container = parse_page_mother.css('.ListingCategories_AllCategories_CATEGORY')
 
-        company.css('img').each do |img|
-            if img.attributes["alt"]&.value&.include?("Phone")
-                phone = img.attributes['alt'].value.split(": ")[-1]
-                break
-            end 
-        end 
-
-        company.css('a').each do |anchor_tag|
-            if anchor_tag.children.text == "Visit Site"
-                url = anchor_tag.attributes['href']&.value
-                break
-            end 
-        end
-
-        comp = {
-            company_name: company.css('.ListingResults_All_ENTRYTITLELEFTBOX').text,
-            address: company.css("span[@itemprop = 'street-address']").text,
-            city: company.css("span[@itemprop = 'locality']").text,
-            state: company.css("span[@itemprop = 'region']").text,
-            zip: company.css("span[@itemprop = 'postal-code']").text,
-            phone: phone,
-            url: url
-        }
-
-        company_array << comp   
-       
-    end  
-
-    File.open('output.txt', 'w') do |fo|
-        company_array.each do |company|
-
-            array = company[:zip].split('')
-            zipArray = Array.new
-            array.each do |num|
-                if (num == " ")
-                    break
-                end
-                zipArray << num
-            end     
-            
-            fo.puts company[:company_name]
-            fo.puts company[:address]
-            fo.puts company[:city] + ', ' + company[:state] + ' ' + zipArray.join('')
-            fo.puts company[:phone]
-            fo.puts company[:url]
-            fo.puts '' 
-
-        end
+    url_container.each do |title|
+        link = 'https://web.dallaschamber.org/' + title.css('a')[0].attributes['href'].value
+        mother_array << link
     end 
 
+    # get all the data from each link 
+
+    mother_array.each do |url|
+        unparsed_page = HTTParty.get(url)
+        parse_page = Nokogiri::HTML(unparsed_page)
+
+        company_array = Array.new
+        company_cards = parse_page.css('.ListingResults_All_CONTAINER')
+
+        company_cards.each do |company|
+            
+            phone = ""
+            url = ""
+
+            company.css('img').each do |img|
+                if img.attributes["alt"]&.value&.include?("Phone")
+                    phone = img.attributes['alt'].value.split(": ")[-1]
+                    break
+                end 
+            end 
+
+            company.css('a').each do |anchor_tag|
+                if anchor_tag.children.text == "Visit Site"
+                    url = anchor_tag.attributes['href']&.value
+                    break
+                end 
+            end
+
+            comp = {
+                company_name: company.css('.ListingResults_All_ENTRYTITLELEFTBOX').text,
+                address: company.css("span[@itemprop = 'street-address']").text,
+                city: company.css("span[@itemprop = 'locality']").text,
+                state: company.css("span[@itemprop = 'region']").text,
+                zip: company.css("span[@itemprop = 'postal-code']").text,
+                phone: phone,
+                url: url
+            }
+
+            company_array << comp   
+        
+        end  
+
+        File.open('output.txt', 'w') do |fo|
+            company_array.each do |company|
+
+                array = company[:zip].split('')
+                zipArray = Array.new
+                array.each do |num|
+                    if (num == " ")
+                        break
+                    end
+                    zipArray << num
+                end     
+                
+                fo.puts company[:company_name]
+                fo.puts company[:address]
+                fo.puts company[:city] + ', ' + company[:state] + ' ' + zipArray.join('')
+                fo.puts company[:phone]
+                fo.puts company[:url]
+                fo.puts '' 
+
+            end
+        end 
+    end 
 end 
 
 scraper
